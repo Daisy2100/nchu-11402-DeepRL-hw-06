@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HW4 — 智慧學術研究助理 AI Harness 系統設計</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0F1B35;
+    --blue: #1A3A6B;
+    --mid-blue: #2B5EA7;
+    --light-blue: #4A90D9;
+    --accent: #3ECFB2;
+    --accent2: #F9A825;
+    --accent3: #E85D24;
+    --surface: #F5F8FF;
+    --white: #FFFFFF;
+    --gray: #6B7A99;
+    --border: rgba(42,94,167,0.15);
+    --text: #0F1B35;
+    --text-muted: #4A5568;
+  }
+
+  body {
+    font-family: 'Space Grotesk', 'Noto Sans TC', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    background: linear-gradient(135deg, #0F1B35 0%, #1A3A6B 60%, #2B5EA7 100%);
+    padding: 56px 80px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -60px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(62,207,178,0.15) 0%, transparent 70%);
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 30%;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(74,144,217,0.12) 0%, transparent 70%);
+  }
+  .hw-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(62,207,178,0.12);
+    border: 1px solid rgba(62,207,178,0.3);
+    border-radius: 20px;
+    padding: 5px 16px;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .header h1 span { color: var(--accent); }
+  .header .subtitle {
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+    position: relative; z-index: 1;
+  }
+  .header-meta {
+    display: flex;
+    gap: 32px;
+    margin-top: 32px;
+    position: relative; z-index: 1;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .meta-label { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.08em; text-transform: uppercase; }
+  .meta-value { font-size: 14px; font-weight: 500; }
+
+  /* ---- MAIN GRID ---- */
+  .main { padding: 48px 80px; background: #0D1629; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(62,207,178,0.2);
+  }
+
+  h2 { font-size: 22px; font-weight: 600; margin-bottom: 24px; }
+
+  /* ---- ARCHITECTURE ---- */
+  .arch-section { margin-bottom: 48px; }
+
+  /* ---- TOOLS GRID ---- */
+  .tools-section { margin-bottom: 48px; }
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  .tool-card {
+    background: #131f3a;
+    border: 1px solid rgba(74,144,217,0.2);
+    border-radius: 12px;
+    padding: 20px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .tool-card:nth-child(1)::before { background: var(--accent); }
+  .tool-card:nth-child(2)::before { background: var(--light-blue); }
+  .tool-card:nth-child(3)::before { background: var(--accent2); }
+  .tool-card:nth-child(4)::before { background: #A78BFA; }
+  .tool-card:nth-child(5)::before { background: var(--accent3); }
+  .tool-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .tool-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 8px;
+    font-family: 'Space Grotesk', monospace;
+  }
+  .tool-desc {
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .tool-io {
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 10px;
+    font-size: 10.5px;
+    color: rgba(255,255,255,0.35);
+    line-height: 1.6;
+  }
+  .tool-io span { color: rgba(255,255,255,0.6); }
+
+  /* ---- TWO COL ---- */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 48px; }
+
+  /* ---- WORKFLOW ---- */
+  .workflow-card {
+    background: #131f3a;
+    border: 1px solid rgba(74,144,217,0.2);
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .workflow-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .workflow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 38px;
+    bottom: -20px;
+    width: 1px;
+    background: rgba(74,144,217,0.25);
+  }
+  .step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(74,144,217,0.15);
+    border: 1px solid rgba(74,144,217,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--light-blue);
+    flex-shrink: 0;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .step-tool {
+    font-size: 11px;
+    color: var(--accent);
+    font-family: monospace;
+    background: rgba(62,207,178,0.1);
+    border: 1px solid rgba(62,207,178,0.2);
+    border-radius: 4px;
+    padding: 1px 7px;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+  .step-cond {
+    font-size: 10.5px;
+    color: rgba(255,255,255,0.35);
+  }
+
+  /* ---- EVALUATION ---- */
+  .eval-card {
+    background: #131f3a;
+    border: 1px solid rgba(74,144,217,0.2);
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .eval-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .eval-row:last-child { border-bottom: none; }
+  .eval-name { font-size: 12.5px; font-weight: 500; flex: 1; }
+  .eval-metric { font-size: 11px; color: rgba(255,255,255,0.45); flex: 1.2; }
+  .eval-target {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: rgba(62,207,178,0.1);
+    border: 1px solid rgba(62,207,178,0.2);
+    border-radius: 6px;
+    padding: 3px 10px;
+    min-width: 70px;
+    text-align: center;
+  }
+  .eval-bar-wrap { width: 80px; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+  .eval-bar { height: 100%; border-radius: 3px; background: var(--accent); }
+
+  /* ---- MEMORY DIAGRAM ---- */
+  .memory-card {
+    background: #131f3a;
+    border: 1px solid rgba(74,144,217,0.2);
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  /* ---- FOOTER ---- */
+  .footer {
+    background: #090e1a;
+    padding: 24px 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+  }
+  .footer strong { color: rgba(255,255,255,0.4); }
+
+  /* SVG styles */
+  .arch-svg { width: 100%; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="hw-badge">Homework 4 · AI Harness Systems Design</div>
+  <h1>智慧學術研究助理<br><span>AI Harness</span> 系統設計</h1>
+  <p class="subtitle">Smart Academic Research Assistant — LLM Orchestrator + Tool Chain + Memory</p>
+  <div class="header-meta">
+    <div class="meta-item"><span class="meta-label">應用場景</span><span class="meta-value">學術研究輔助</span></div>
+    <div class="meta-item"><span class="meta-label">工具數量</span><span class="meta-value">5 個專用工具</span></div>
+    <div class="meta-item"><span class="meta-label">Orchestration</span><span class="meta-value">ReAct 模式</span></div>
+    <div class="meta-item"><span class="meta-label">記憶機制</span><span class="meta-value">雙層記憶架構</span></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ARCHITECTURE -->
+  <div class="arch-section">
+    <div class="section-label">System Architecture</div>
+    <svg class="arch-svg" viewBox="0 0 1040 420" xmlns="http://www.w3.org/2000/svg" role="img">
+      <title>智慧學術研究助理系統架構圖</title>
+      <desc>展示 LLM Orchestrator、工具層、記憶層與輸入輸出層的系統架構</desc>
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+        <filter id="glow-teal">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+        </filter>
+      </defs>
+
+      <!-- Background regions -->
+      <rect x="20" y="10" width="1000" height="70" rx="8" fill="rgba(62,207,178,0.04)" stroke="rgba(62,207,178,0.12)" stroke-width="0.5" stroke-dasharray="4,3"/>
+      <text x="30" y="28" fill="rgba(62,207,178,0.5)" font-size="10" font-family="Space Grotesk, sans-serif" letter-spacing="0.1em">INPUT LAYER</text>
+
+      <rect x="20" y="100" width="1000" height="100" rx="8" fill="rgba(74,144,217,0.05)" stroke="rgba(74,144,217,0.15)" stroke-width="0.5" stroke-dasharray="4,3"/>
+      <text x="30" y="118" fill="rgba(74,144,217,0.5)" font-size="10" font-family="Space Grotesk, sans-serif" letter-spacing="0.1em">ORCHESTRATION LAYER</text>
+
+      <rect x="20" y="220" width="670" height="100" rx="8" fill="rgba(249,168,37,0.04)" stroke="rgba(249,168,37,0.12)" stroke-width="0.5" stroke-dasharray="4,3"/>
+      <text x="30" y="238" fill="rgba(249,168,37,0.5)" font-size="10" font-family="Space Grotesk, sans-serif" letter-spacing="0.1em">TOOL LAYER</text>
+
+      <rect x="710" y="100" width="310" height="220" rx="8" fill="rgba(167,139,250,0.05)" stroke="rgba(167,139,250,0.15)" stroke-width="0.5" stroke-dasharray="4,3"/>
+      <text x="720" y="118" fill="rgba(167,139,250,0.5)" font-size="10" font-family="Space Grotesk, sans-serif" letter-spacing="0.1em">MEMORY LAYER</text>
+
+      <rect x="20" y="340" width="1000" height="70" rx="8" fill="rgba(232,93,36,0.04)" stroke="rgba(232,93,36,0.12)" stroke-width="0.5" stroke-dasharray="4,3"/>
+      <text x="30" y="358" fill="rgba(232,93,36,0.5)" font-size="10" font-family="Space Grotesk, sans-serif" letter-spacing="0.1em">OUTPUT LAYER</text>
+
+      <!-- User Input Box -->
+      <rect x="380" y="24" width="280" height="46" rx="8" fill="rgba(62,207,178,0.1)" stroke="rgba(62,207,178,0.4)" stroke-width="1"/>
+      <text x="520" y="44" text-anchor="middle" font-size="13" font-weight="600" fill="#3ECFB2" font-family="Space Grotesk, sans-serif">使用者研究問題</text>
+      <text x="520" y="60" text-anchor="middle" font-size="11" fill="rgba(62,207,178,0.6)" font-family="Space Grotesk, sans-serif">User Research Query</text>
+
+      <!-- Arrow to LLM -->
+      <line x1="520" y1="70" x2="520" y2="112" stroke="rgba(62,207,178,0.5)" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- LLM Orchestrator -->
+      <rect x="300" y="114" width="440" height="74" rx="10" fill="rgba(74,144,217,0.15)" stroke="#4A90D9" stroke-width="1.5"/>
+      <text x="520" y="142" text-anchor="middle" font-size="15" font-weight="700" fill="white" font-family="Space Grotesk, sans-serif">LLM Orchestrator</text>
+      <text x="520" y="162" text-anchor="middle" font-size="11.5" fill="rgba(255,255,255,0.55)" font-family="Space Grotesk, sans-serif">GPT-4 / Claude  ·  ReAct Reasoning  ·  Tool Selection  ·  Decision Making</text>
+      <text x="520" y="178" text-anchor="middle" font-size="10" fill="rgba(74,144,217,0.7)" font-family="Space Grotesk, sans-serif">Thought → Action → Observation → Loop</text>
+
+      <!-- Memory connections -->
+      <path d="M740 151 L722 151" stroke="rgba(167,139,250,0.5)" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)" fill="none"/>
+      <path d="M722 200 L740 200" stroke="rgba(167,139,250,0.5)" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arr)" fill="none"/>
+
+      <!-- Working Memory -->
+      <rect x="724" y="124" width="270" height="60" rx="8" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.3)" stroke-width="0.8"/>
+      <text x="859" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#A78BFA" font-family="Space Grotesk, sans-serif">Working Memory</text>
+      <text x="859" y="165" text-anchor="middle" font-size="10.5" fill="rgba(167,139,250,0.6)" font-family="Space Grotesk, sans-serif">對話歷史 · 16k token window</text>
+
+      <!-- Research Cache -->
+      <rect x="724" y="200" width="270" height="60" rx="8" fill="rgba(74,58,190,0.12)" stroke="rgba(74,58,190,0.3)" stroke-width="0.8"/>
+      <text x="859" y="224" text-anchor="middle" font-size="12" font-weight="600" fill="#818CF8" font-family="Space Grotesk, sans-serif">Research Cache</text>
+      <text x="859" y="241" text-anchor="middle" font-size="10.5" fill="rgba(129,140,248,0.6)" font-family="Space Grotesk, sans-serif">向量資料庫 · 長期研究記憶</text>
+
+      <!-- Tool calling arrows -->
+      <line x1="420" y1="188" x2="130" y2="232" stroke="rgba(249,168,37,0.4)" stroke-width="1" marker-end="url(#arr)" fill="none"/>
+      <line x1="460" y1="188" x2="272" y2="232" stroke="rgba(249,168,37,0.4)" stroke-width="1" marker-end="url(#arr)" fill="none"/>
+      <line x1="520" y1="188" x2="430" y2="232" stroke="rgba(249,168,37,0.4)" stroke-width="1" marker-end="url(#arr)" fill="none"/>
+      <line x1="565" y1="188" x2="565" y2="232" stroke="rgba(249,168,37,0.4)" stroke-width="1" marker-end="url(#arr)" fill="none"/>
+      <line x1="620" y1="188" x2="665" y2="232" stroke="rgba(249,168,37,0.4)" stroke-width="1" marker-end="url(#arr)" fill="none"/>
+
+      <!-- Tool 1: search_papers -->
+      <rect x="40" y="234" width="160" height="74" rx="8" fill="rgba(62,207,178,0.1)" stroke="rgba(62,207,178,0.3)" stroke-width="0.8"/>
+      <text x="120" y="262" text-anchor="middle" font-size="11" font-weight="700" fill="#3ECFB2" font-family="monospace">search_papers</text>
+      <text x="120" y="278" text-anchor="middle" font-size="10" fill="rgba(62,207,178,0.5)" font-family="Space Grotesk, sans-serif">跨資料庫搜尋</text>
+      <text x="120" y="295" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.25)" font-family="Space Grotesk, sans-serif">arXiv · Semantic Scholar</text>
+
+      <!-- Tool 2: summarize_paper -->
+      <rect x="210" y="234" width="160" height="74" rx="8" fill="rgba(74,144,217,0.1)" stroke="rgba(74,144,217,0.3)" stroke-width="0.8"/>
+      <text x="290" y="262" text-anchor="middle" font-size="11" font-weight="700" fill="#4A90D9" font-family="monospace">summarize_paper</text>
+      <text x="290" y="278" text-anchor="middle" font-size="10" fill="rgba(74,144,217,0.5)" font-family="Space Grotesk, sans-serif">論文深度摘要</text>
+      <text x="290" y="295" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.25)" font-family="Space Grotesk, sans-serif">方法 · 結果 · 限制</text>
+
+      <!-- Tool 3: compare_literature -->
+      <rect x="380" y="234" width="170" height="74" rx="8" fill="rgba(249,168,37,0.1)" stroke="rgba(249,168,37,0.3)" stroke-width="0.8"/>
+      <text x="465" y="262" text-anchor="middle" font-size="11" font-weight="700" fill="#F9A825" font-family="monospace">compare_literature</text>
+      <text x="465" y="278" text-anchor="middle" font-size="10" fill="rgba(249,168,37,0.5)" font-family="Space Grotesk, sans-serif">文獻比較分析</text>
+      <text x="465" y="295" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.25)" font-family="Space Grotesk, sans-serif">比較矩陣 · 共識分歧</text>
+
+      <!-- Tool 4: cite_formatter -->
+      <rect x="560" y="234" width="150" height="74" rx="8" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.3)" stroke-width="0.8"/>
+      <text x="635" y="258" text-anchor="middle" font-size="11" font-weight="700" fill="#A78BFA" font-family="monospace">cite_formatter</text>
+      <text x="635" y="275" text-anchor="middle" font-size="10" fill="rgba(167,139,250,0.5)" font-family="Space Grotesk, sans-serif">引用格式化</text>
+      <text x="635" y="292" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.25)" font-family="Space Grotesk, sans-serif">APA · IEEE · MLA</text>
+
+      <!-- Tool 5: generate_report (positioned below Tool 3, connecting to output) -->
+      <!-- Arrow from tool layer to output -->
+      <line x1="200" y1="308" x2="320" y2="352" stroke="rgba(232,93,36,0.4)" stroke-width="1" marker-end="url(#arr)" fill="none"/>
+      <line x1="380" y1="308" x2="440" y2="352" stroke="rgba(232,93,36,0.4)" stroke-width="1" marker-end="url(#arr)" fill="none"/>
+      <line x1="540" y1="308" x2="530" y2="352" stroke="rgba(232,93,36,0.4)" stroke-width="1" marker-end="url(#arr)" fill="none"/>
+      <line x1="640" y1="308" x2="620" y2="352" stroke="rgba(232,93,36,0.4)" stroke-width="1" marker-end="url(#arr)" fill="none"/>
+
+      <!-- Output Box -->
+      <rect x="220" y="354" width="500" height="48" rx="8" fill="rgba(232,93,36,0.1)" stroke="rgba(232,93,36,0.35)" stroke-width="1"/>
+      <text x="470" y="376" text-anchor="middle" font-size="13" font-weight="600" fill="#E85D24" font-family="Space Grotesk, sans-serif">結構化研究報告</text>
+      <text x="470" y="391" text-anchor="middle" font-size="10.5" fill="rgba(232,93,36,0.6)" font-family="Space Grotesk, sans-serif">摘要 · 比較矩陣 · 引用清單 · Markdown / PDF</text>
+
+      <!-- generate_report tool label floating near output arrow -->
+      <rect x="724" y="270" width="270" height="48" rx="8" fill="rgba(232,93,36,0.08)" stroke="rgba(232,93,36,0.25)" stroke-width="0.8"/>
+      <text x="859" y="291" text-anchor="middle" font-size="11" font-weight="700" fill="#E85D24" font-family="monospace">generate_report</text>
+      <text x="859" y="308" text-anchor="middle" font-size="10" fill="rgba(232,93,36,0.5)" font-family="Space Grotesk, sans-serif">完整文獻綜述產出</text>
+      <line x1="724" y1="294" x2="716" y2="375" stroke="rgba(232,93,36,0.3)" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arr)" fill="none"/>
+    </svg>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="tools-section">
+    <div class="section-label">Tool Design — Function Calling</div>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-num">TOOL 01</div>
+        <div class="tool-name">search_papers()</div>
+        <div class="tool-desc">跨學術資料庫搜尋相關論文，支援關鍵字、年份範圍篩選</div>
+        <div class="tool-io">
+          <div><span>IN:</span> query, year_range, source, max_results</div>
+          <div><span>OUT:</span> 論文列表 (title, DOI, snippet)</div>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-num">TOOL 02</div>
+        <div class="tool-name">summarize_paper()</div>
+        <div class="tool-desc">深度摘要單篇論文，結構化呈現方法、結果與研究限制</div>
+        <div class="tool-io">
+          <div><span>IN:</span> doi_or_url, focus_aspect</div>
+          <div><span>OUT:</span> 結構化摘要 (方法/結果/限制)</div>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-num">TOOL 03</div>
+        <div class="tool-name">compare_literature()</div>
+        <div class="tool-desc">比較多篇論文，找出共識、分歧與研究缺口</div>
+        <div class="tool-io">
+          <div><span>IN:</span> paper_ids[], comparison_axes[]</div>
+          <div><span>OUT:</span> 比較矩陣 + 綜合分析段落</div>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-num">TOOL 04</div>
+        <div class="tool-name">cite_formatter()</div>
+        <div class="tool-desc">將論文 ID 轉換為指定格式引用清單（APA/IEEE/MLA）</div>
+        <div class="tool-io">
+          <div><span>IN:</span> paper_ids[], citation_style</div>
+          <div><span>OUT:</span> 格式化引用字串列表</div>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-num">TOOL 05</div>
+        <div class="tool-name">generate_report()</div>
+        <div class="tool-desc">整合所有摘要與比較，產出完整結構化文獻綜述報告</div>
+        <div class="tool-io">
+          <div><span>IN:</span> topic, summaries[], format</div>
+          <div><span>OUT:</span> Markdown 研究報告</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKFLOW + EVALUATION -->
+  <div class="two-col">
+    <div>
+      <div class="section-label">Agent Workflow</div>
+      <div class="workflow-card">
+        <div class="workflow-step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">解析研究問題，提取關鍵詞</div>
+            <div class="step-cond">LLM 推理，無工具呼叫</div>
+          </div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">搜尋相關論文</div>
+            <div class="step-tool">search_papers()</div>
+            <div class="step-cond">結果 &lt; 5 篇 → 擴大搜尋範圍重試</div>
+          </div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">篩選高相關論文</div>
+            <div class="step-cond">LLM 推理，相關性分數閾值 0.7</div>
+          </div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">並行摘要各篇論文（最多 5 篇）</div>
+            <div class="step-tool">summarize_paper() × N</div>
+            <div class="step-cond">並行呼叫，忠實度檢查</div>
+          </div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <div class="step-title">比較文獻，找出共識與分歧</div>
+            <div class="step-tool">compare_literature()</div>
+            <div class="step-cond">論文 ≥ 2 篇時執行</div>
+          </div>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">6</div>
+          <div class="step-content">
+            <div class="step-title">產出研究報告草稿</div>
+            <div class="step-tool">generate_report()</div>
+          </div>
+        </div>
+        <div class="workflow-step" style="margin-bottom:0">
+          <div class="step-num">7</div>
+          <div class="step-content">
+            <div class="step-title">格式化引用清單輸出</div>
+            <div class="step-tool">cite_formatter()</div>
+            <div class="step-cond">依使用者指定格式（APA / IEEE）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Evaluation Metrics</div>
+      <div class="eval-card">
+        <div class="eval-row" style="border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:10px;margin-bottom:6px">
+          <span style="font-size:11px;color:rgba(255,255,255,0.3);flex:1">評估面向</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.3);flex:1.2">指標</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.3);min-width:70px;text-align:center">目標值</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.3);width:80px;text-align:right">達成度</span>
+        </div>
+        <div class="eval-row">
+          <span class="eval-name">搜尋相關性</span>
+          <span class="eval-metric">Precision@5</span>
+          <span class="eval-target">≥ 0.80</span>
+          <div class="eval-bar-wrap"><div class="eval-bar" style="width:80%"></div></div>
+        </div>
+        <div class="eval-row">
+          <span class="eval-name">摘要忠實度</span>
+          <span class="eval-metric">ROUGE-L + 人工評分</span>
+          <span class="eval-target">≥ 0.75</span>
+          <div class="eval-bar-wrap"><div class="eval-bar" style="width:75%;background:#4A90D9"></div></div>
+        </div>
+        <div class="eval-row">
+          <span class="eval-name">任務完成率</span>
+          <span class="eval-metric">Task Completion Rate</span>
+          <span class="eval-target">≥ 90%</span>
+          <div class="eval-bar-wrap"><div class="eval-bar" style="width:90%;background:#F9A825"></div></div>
+        </div>
+        <div class="eval-row">
+          <span class="eval-name">回應延遲</span>
+          <span class="eval-metric">P95 Latency</span>
+          <span class="eval-target">≤ 30s</span>
+          <div class="eval-bar-wrap"><div class="eval-bar" style="width:70%;background:#A78BFA"></div></div>
+        </div>
+        <div class="eval-row">
+          <span class="eval-name">使用者滿意度</span>
+          <span class="eval-metric">CSAT Score (5 分制)</span>
+          <span class="eval-target">≥ 4.0</span>
+          <div class="eval-bar-wrap"><div class="eval-bar" style="width:85%;background:#E85D24"></div></div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="section-label">Orchestration — ReAct Loop</div>
+        <div class="eval-card">
+          <svg viewBox="0 0 400 130" width="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </marker>
+            </defs>
+            <!-- Thought -->
+            <rect x="10" y="40" width="90" height="50" rx="8" fill="rgba(62,207,178,0.12)" stroke="rgba(62,207,178,0.4)" stroke-width="0.8"/>
+            <text x="55" y="62" text-anchor="middle" font-size="12" font-weight="600" fill="#3ECFB2" font-family="Space Grotesk, sans-serif">Thought</text>
+            <text x="55" y="78" text-anchor="middle" font-size="9.5" fill="rgba(62,207,178,0.6)" font-family="Space Grotesk, sans-serif">LLM 推理</text>
+            <!-- Action -->
+            <rect x="120" y="40" width="90" height="50" rx="8" fill="rgba(74,144,217,0.12)" stroke="rgba(74,144,217,0.4)" stroke-width="0.8"/>
+            <text x="165" y="62" text-anchor="middle" font-size="12" font-weight="600" fill="#4A90D9" font-family="Space Grotesk, sans-serif">Action</text>
+            <text x="165" y="78" text-anchor="middle" font-size="9.5" fill="rgba(74,144,217,0.6)" font-family="Space Grotesk, sans-serif">Tool Call</text>
+            <!-- Observation -->
+            <rect x="230" y="40" width="100" height="50" rx="8" fill="rgba(249,168,37,0.12)" stroke="rgba(249,168,37,0.4)" stroke-width="0.8"/>
+            <text x="280" y="62" text-anchor="middle" font-size="12" font-weight="600" fill="#F9A825" font-family="Space Grotesk, sans-serif">Observation</text>
+            <text x="280" y="78" text-anchor="middle" font-size="9.5" fill="rgba(249,168,37,0.6)" font-family="Space Grotesk, sans-serif">Tool Result</text>
+            <!-- Done -->
+            <rect x="342" y="40" width="52" height="50" rx="8" fill="rgba(232,93,36,0.12)" stroke="rgba(232,93,36,0.4)" stroke-width="0.8"/>
+            <text x="368" y="62" text-anchor="middle" font-size="11" font-weight="600" fill="#E85D24" font-family="Space Grotesk, sans-serif">Done?</text>
+            <text x="368" y="78" text-anchor="middle" font-size="9" fill="rgba(232,93,36,0.5)" font-family="Space Grotesk, sans-serif">Output</text>
+            <!-- Arrows -->
+            <line x1="100" y1="65" x2="118" y2="65" stroke="rgba(255,255,255,0.3)" stroke-width="1" marker-end="url(#arr2)"/>
+            <line x1="210" y1="65" x2="228" y2="65" stroke="rgba(255,255,255,0.3)" stroke-width="1" marker-end="url(#arr2)"/>
+            <line x1="330" y1="65" x2="340" y2="65" stroke="rgba(255,255,255,0.3)" stroke-width="1" marker-end="url(#arr2)"/>
+            <!-- Loop back arrow -->
+            <path d="M340 55 Q340 20 165 20 Q55 20 55 38" stroke="rgba(62,207,178,0.35)" stroke-width="1" fill="none" stroke-dasharray="3,2" marker-end="url(#arr2)"/>
+            <text x="195" y="14" text-anchor="middle" font-size="9" fill="rgba(62,207,178,0.45)" font-family="Space Grotesk, sans-serif">Not done → loop</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div><strong>HW4 · AI Harness Systems Design and Analysis</strong> · 智慧學術研究助理</div>
+  <div>LLM + Tool Use + ReAct Orchestration · 2026</div>
+</div>
+
+</body>
+</html>
